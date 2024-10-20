@@ -1,0 +1,69 @@
+const int laserPin = 14;  // A0 is equivalent to digital pin 14 for the laser
+const int buttonPin1 = 7; // Button 1 is connected to D7
+const int buttonPin2 = 6; // Button 2 is connected to D6 (used for pack switching)
+const int knobPin = 4;    // Knob is connected to D4 (now treated as a button)
+const int touchPin1 = 2;  // Touch sensor 1 is connected to D2
+const int touchPin2 = 8;  // Touch sensor 2 is connected to D8
+
+bool knobState = false;
+bool lastButtonStates[3] = {false, false, false}; // For B1, T1, T2
+
+void setup() {
+  Serial.begin(9600);
+  
+  pinMode(laserPin, OUTPUT);
+  pinMode(buttonPin1, INPUT_PULLUP);
+  pinMode(buttonPin2, INPUT_PULLUP);
+  pinMode(knobPin, INPUT_PULLUP);
+  pinMode(touchPin1, INPUT_PULLUP);
+  pinMode(touchPin2, INPUT_PULLUP);
+  
+  digitalWrite(laserPin, LOW);  // Start with the laser turned off
+  
+  Serial.println("Setup complete. Press buttons or activate sensors to turn on laser.");
+}
+
+void loop() {
+  bool laserOn = false;
+
+  // Check knob state
+  bool currentKnobState = digitalRead(knobPin) == HIGH;
+  if (currentKnobState != knobState) {
+    knobState = currentKnobState;
+    Serial.print("KNOB:");
+    Serial.println(knobState ? "1" : "0");
+  }
+
+  // Check inputs for laser control and sound triggering
+  bool currentStates[3] = {
+    digitalRead(buttonPin1) == HIGH,
+    digitalRead(touchPin1) == HIGH,
+    digitalRead(touchPin2) == HIGH
+  };
+
+  for (int i = 0; i < 3; i++) {
+    if (currentStates[i] || (knobState && lastButtonStates[i])) {
+      laserOn = true;
+      if (!lastButtonStates[i] || !knobState) {
+        Serial.print(i == 0 ? "B1:" : (i == 1 ? "T1:" : "T2:"));
+        Serial.println("1");
+      }
+      lastButtonStates[i] = true;
+    } else if (lastButtonStates[i]) {
+      Serial.print(i == 0 ? "B1:" : (i == 1 ? "T1:" : "T2:"));
+      Serial.println("0");
+      lastButtonStates[i] = false;
+    }
+  }
+
+  // Check B2 for pack switching
+  if (digitalRead(buttonPin2) == HIGH) {
+    Serial.println("PACK_SWITCH");
+    delay(200); // Debounce
+  }
+
+  // Control the laser based on input state
+  digitalWrite(laserPin, laserOn ? HIGH : LOW);
+
+  delay(50);  // Small delay to prevent flooding the serial monitor
+}

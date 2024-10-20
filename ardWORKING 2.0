@@ -1,0 +1,68 @@
+const int laserPin = 14;  // A0 is equivalent to digital pin 14 for the laser
+const int buttonPin1 = 7; // Button 1 is connected to D7
+const int buttonPin2 = 6; // Button 2 is connected to D6
+const int knobPin = 4;    // Knob is connected to D4
+const int touchPin1 = 2;  // Touch sensor 1 is connected to D2
+const int touchPin2 = 8;  // Touch sensor 2 is connected to D8
+
+void setup() {
+  Serial.begin(9600);  // Start serial communication for debugging
+  
+  pinMode(laserPin, OUTPUT);     // Set the laser pin as an output
+  pinMode(buttonPin1, INPUT_PULLUP);  // Set input pins with internal pull-up resistors
+  pinMode(buttonPin2, INPUT_PULLUP);
+  pinMode(knobPin, INPUT_PULLUP);
+  pinMode(touchPin1, INPUT_PULLUP);
+  pinMode(touchPin2, INPUT_PULLUP);
+  
+  digitalWrite(laserPin, LOW);  // Start with the laser turned off
+  
+  Serial.println("Setup complete. Press buttons or activate sensors to turn on laser.");
+}
+
+void loop() {
+  bool laserOn = false;
+
+  // Check each input and update laserOn (HIGH means pressed/activated)
+  if (digitalRead(buttonPin1) == HIGH) {
+    laserOn = true;
+    Serial.println("B1:1");
+  } else {
+    Serial.println("B1:0");
+  }
+  if (digitalRead(buttonPin2) == HIGH) {
+    laserOn = true;
+    Serial.println("B2:1");
+  } else {
+    Serial.println("B2:0");
+  }
+  if (digitalRead(knobPin) == HIGH) {
+    laserOn = true;
+    Serial.println("K:1");
+  } else {
+    Serial.println("K:0");
+  }
+  if (digitalRead(touchPin1) == HIGH) {
+    laserOn = true;
+    Serial.println("T1:1");
+  } else {
+    Serial.println("T1:0");
+  }
+  if (digitalRead(touchPin2) == HIGH) {
+    laserOn = true;
+    Serial.println("T2:1");
+  } else {
+    Serial.println("T2:0");
+  }
+
+  // Control the laser based on input state
+  if (laserOn) {
+    digitalWrite(laserPin, HIGH);  // Turn laser ON
+    Serial.println("Laser ON");
+  } else {
+    digitalWrite(laserPin, LOW);   // Turn laser OFF
+    Serial.println("Laser OFF");
+  }
+
+  delay(50);  // Small delay to prevent flooding the serial monitor
+}
